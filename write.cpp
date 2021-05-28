@@ -9,6 +9,7 @@ size_t writeCount = 0;
 size_t writeFailCount = 0;
 
 void handleTextWriteTest(std::ofstream& myfile);
+void handleBinaryWriteTest(std::ofstream& myfile);
 
 void writerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode) {
   using namespace std;
@@ -29,6 +30,9 @@ void writerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode
     ofstream myfile(fileName, openMode);
     if(fileType == FileTypes::TEXTUAL) {
       handleTextWriteTest(myfile);
+    }
+    else {
+      handleBinaryWriteTest(myfile);
     }
     chrono::duration<double> elapsedTime = chrono::steady_clock::now() - start;
     elapsedSeconds = elapsedTime.count();
@@ -60,4 +64,8 @@ void handleTextWriteTest(std::ofstream& myfile) {
   else {
     writeOpenFailCount++;
   }
+}
+
+void handleBinaryWriteTest(std::ofstream& myfile) {
+
 }
