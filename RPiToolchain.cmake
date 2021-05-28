@@ -21,7 +21,7 @@ if(NOT DEFINED ENV{RASPBIAN_ROOTFS})
 		"Define the RASPBIAN_ROOTFS variable to point to the Raspberry Pi rootfs."
 	)
 else()
-	set(SYSROOT_PATH "$ENV{RASPBIAN_ROOTFS}")
+	set(SYSROOT_PATH "$ENV{RASPBIAN_ROOTFS}" CACHE PATH "Raspbain root filesystem path")
 	message(STATUS "Raspberry Pi sysroot: ${SYSROOT_PATH}")
 endif()
 

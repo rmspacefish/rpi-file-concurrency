@@ -1,6 +1,16 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_TOOLCHAIN_FILE "RPiToolchain.cmake")
+if(NOT DEFINED OS_APP)
+    set(OS_APP "host")
+endif()
+
+set(OS_APP ${OS_APP} CACHE STRING "Application OS")
+
+set_property(CACHE OS_APP PROPERTY STRINGS "host" "rpi")
+
+if(OS_APP MATCHES "rpi")
+    set(CMAKE_TOOLCHAIN_FILE "RPiToolchain.cmake")
+endif()
 
 # set the project name and version
 project(hello LANGUAGES CXX C VERSION 1.0)
@@ -13,6 +23,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(Threads REQUIRED)
 
 add_executable(${TARGET_NAME})
-target_sources(${TARGET_NAME} PRIVATE hello.cpp)
+target_sources(${TARGET_NAME} PRIVATE 
+    hello.cpp
+    text.cpp
+)
 
 target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
+

@@ -5,6 +5,26 @@ This repository shows how to cross-compile a simple Hello World program and run 
 a Raspberry Pi. It also shows how to install and setup a TCF agent on the Raspberry Pi
 for remote debugging with Eclipse.
 
+# Building Commands
+
+Add `-G "MinGW Makefiles"` on Windows
+
+## Hosted
+
+```
+mkdir build && cd build
+cmake ..
+cmake --build . -j
+```
+
+## Raspberry Pi
+
+```
+mkdir build && cd build
+cmake -DOS_APP=rpi ..
+cmake --build . -j
+```
+
 # Prerequisites for cross-compiling
 
 1. `CMake` installed
