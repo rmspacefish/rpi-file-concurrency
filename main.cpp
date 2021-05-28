@@ -13,11 +13,11 @@
 #define APPEND_MODE     0
 #define TRUNCATE_MODE   1
 
-#define FILE_TYPE       TEXTUAL_MODE
+#define FILE_TYPE       BINARY_MODE
 #define FILE_MODE       APPEND_MODE
 
-void readerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode);
-void writerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode);
+void readerFunc(std::string fileName, FileTypes fileType, FileModes fileMode);
+void writerFunc(std::string fileName, FileTypes fileType, FileModes fileMode);
 
 // Code
 
@@ -33,10 +33,14 @@ int main() {
     cout << "Removed existing binary file" << endl;
   }
 
+
+  std::string fileName;
 #if FILE_TYPE == TEXTUAL_MODE
   FileTypes fileType = FileTypes::TEXTUAL;
+  fileName = TXT_FILE_NAME;
 #elif FILE_TYPE == BINARY_MODE
-  FIleTypes fileType = FileTypes::BINARY
+  fileName = BIN_FILE_NAME;
+  FileTypes fileType = FileTypes::BINARY;
 #endif
 
 #if FILE_MODE == APPEND_MODE
@@ -45,9 +49,10 @@ int main() {
   FileModes fileMode = FileModes::TRUNCATE;
 #endif
 
-  thread writerTask(writerFuncText, TXT_FILE_NAME, fileType, fileMode);
+
+  thread writerTask(writerFunc, fileName, fileType, fileMode);
   std::this_thread::sleep_for(std::chrono::milliseconds(1));
-  thread readerTask(readerFuncText, TXT_FILE_NAME, fileType, fileMode);
+  thread readerTask(readerFunc, fileName, fileType, fileMode);
   readerTask.join();
   writerTask.join();
 

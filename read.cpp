@@ -7,17 +7,24 @@
 
 static size_t readOpenFailCount = 0;
 static size_t readCount = 0;
-static size_t readLineOne = 0;
-static size_t readBothLines = 0;
-static size_t faultyReadCount = 0;
 static size_t goodFileCount = 0;
 static size_t badFileEofCount = 0;
 static size_t badFileFailCount = 0;
+static size_t faultyReadCount = 0;
+
+static size_t readLineOne = 0;
+static size_t readBothLines = 0;
+
+static size_t stateOneReadCnt = 0;
+static size_t stateTwoReadCnt = 0;
+static size_t invalidStateCnt = 0;
 
 void textFileReadTest(std::ifstream& myfile, FileModes fileMode);
 void binFileReadTest(std::ifstream& myfile, FileModes fileMode);
+bool checkFileState(std::ifstream& myfile);
 
-void readerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode) {
+
+void readerFunc(std::string fileName, FileTypes fileType, FileModes fileMode) {
   using namespace std;
   auto start = chrono::steady_clock::now();
   double elapsedSeconds = 0;
@@ -36,10 +43,19 @@ void readerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode
     chrono::duration<double> elapsedTime = chrono::steady_clock::now() - start;
     elapsedSeconds = elapsedTime.count();
   }
+
   cout << "Read Open Fail Count: " << readOpenFailCount << "\n";
   cout << "Read Count: " << readCount << "\n";
-  cout << "Read One Line Count: " << readLineOne << "\n";
-  cout << "Read Both Lines Count: " << readBothLines << "\n";
+  if(fileType == FileTypes::TEXTUAL) {
+    cout << "Read One Line Count: " << readLineOne << "\n";
+    cout << "Read Both Lines Count: " << readBothLines << "\n";
+  }
+  else {
+    cout << "Blob in state one read: " << stateOneReadCnt << "\n";
+    cout << "Blob in state two read: " << stateTwoReadCnt << "\n";
+    cout << "Blob in invalid state: " << invalidStateCnt << "\n";
+  }
+
   cout << "Faulty Read Count: " << faultyReadCount << "\n";
   cout << "EOF Count: " << badFileEofCount << "\n";
   cout << "Fail Count: " << badFileFailCount << "\n";
@@ -66,17 +82,7 @@ void textFileReadTest(std::ifstream& myfile, FileModes fileMode) {
         lineIdx++;
       }
       else {
-        if(myfile.good()) {
-          goodFileCount++;
-        }
-        else {
-          if(myfile.eof()) {
-            badFileEofCount++;
-          }
-          if(myfile.fail()) {
-            badFileFailCount++;
-          }
-        }
+        checkFileState(myfile);
       }
       if(fileMode == FileModes::APPEND and lineIdx >= 2) {
          break;
@@ -92,7 +98,45 @@ void textFileReadTest(std::ifstream& myfile, FileModes fileMode) {
 }
 
 void binFileReadTest(std::ifstream& myfile, FileModes fileMode) {
+  using namespace std;
+  CriticalBlob readBlob = {};
   if(myfile.is_open()) {
+    myfile.read(reinterpret_cast<char*>(&readBlob), sizeof(readBlob));
+    if(checkFileState(myfile)) {
+      bool someBool = readBlob.someBool;
+      uint32_t someCounter = readBlob.someCounter;
+      std::string someName(readBlob.someName);
+      int32_t someSignedNumber = readBlob.someSignedNumber;
+      if(someBool == true and someCounter == 16 and someName == "/tmp/hello"
+          and someSignedNumber == -32) {
+        stateOneReadCnt++;
+      }
+      else if(someBool == false and someCounter == 32 and someName == "/mnt/praisethesun"
+          and someSignedNumber == 32) {
+        stateTwoReadCnt++;
+      }
+      else {
+        invalidStateCnt++;
+      }
+    }
+  }
+  else {
+    readOpenFailCount++;
+  }
+}
 
+bool checkFileState(std::ifstream& myfile) {
+  if(myfile.good()) {
+    goodFileCount++;
+    return true;
+  }
+  else {
+    if(myfile.eof()) {
+      badFileEofCount++;
+    }
+    if(myfile.fail()) {
+      badFileFailCount++;
+    }
+    return false;
   }
 }

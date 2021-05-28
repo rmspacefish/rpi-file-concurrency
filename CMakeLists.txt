@@ -31,3 +31,5 @@ target_sources(${TARGET_NAME} PRIVATE
 
 target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
 
+include (${CMAKE_CURRENT_SOURCE_DIR}/BuildType.cmake)
+set_build_type()
