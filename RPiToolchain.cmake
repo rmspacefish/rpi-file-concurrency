@@ -1,6 +1,6 @@
 if(NOT DEFINED ENV{RASPBERRY_VERSION})
 	message(STATUS "Raspberry Pi version not specified, setting version 4!")
-	set(RASPBERRY_VERSION 4)
+	set(RASPBERRY_VERSION 4 CACHE STRING "Raspberry Pi Version")
 else()
 	set(RASPBERRY_VERSION $ENV{RASPBERRY_VERSION})
 endif()
@@ -15,15 +15,17 @@ endif()
 # application CMakeLists.txt before loading the toolchain file.
 
 # CROSS_COMPILE also needs to be set accordingly or passed to the CMake command
-
-if(NOT DEFINED ENV{RASPBIAN_ROOTFS})
-	message(FATAL_ERROR 
-		"Define the RASPBIAN_ROOTFS variable to point to the Raspberry Pi rootfs."
-	)
-else()
-	set(SYSROOT_PATH "$ENV{RASPBIAN_ROOTFS}" CACHE PATH "Raspbain root filesystem path")
-	message(STATUS "Raspberry Pi sysroot: ${SYSROOT_PATH}")
+if(NOT DEFINED CACHE{SYSROOT_PATH})
+    if(NOT DEFINED ENV{RASPBIAN_ROOTFS})
+    	message(SEND_ERROR
+    	 	"Define the RASPBIAN_ROOTFS variable to point to the Raspberry Pi rootfs."
+    	)
+    else()
+    	set(SYSROOT_PATH "$ENV{RASPBIAN_ROOTFS}" CACHE PATH "Raspbian root filesystem path")
+    endif()
 endif()
+
+message(STATUS "Raspberry Pi sysroot: ${SYSROOT_PATH}")
 
 if(NOT DEFINED ENV{CROSS_COMPILE})
 	set(CROSS_COMPILE "arm-linux-gnueabihf")

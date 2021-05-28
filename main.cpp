@@ -19,6 +19,15 @@
 void readerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode);
 void writerFuncText(std::string fileName, FileTypes fileType, FileModes fileMode);
 
+size_t readOpenFailCount = 0;
+size_t readCount = 0;
+size_t readLineOne = 0;
+size_t readBothLines = 0;
+size_t faultyReadCount = 0;
+size_t goodFileCount = 0;
+size_t badFileEofCount = 0;
+size_t badFileFailCount = 0;
+
 // Code
 
 int main() {

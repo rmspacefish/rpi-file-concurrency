@@ -13,7 +13,7 @@ if(OS_APP MATCHES "rpi")
 endif()
 
 # set the project name and version
-project(hello LANGUAGES CXX C VERSION 1.0)
+project(fs-concurrency LANGUAGES CXX C VERSION 1.0)
 set(TARGET_NAME ${CMAKE_PROJECT_NAME})
 
 # specify the C++ standard
@@ -24,8 +24,9 @@ find_package(Threads REQUIRED)
 
 add_executable(${TARGET_NAME})
 target_sources(${TARGET_NAME} PRIVATE 
-    hello.cpp
-    text.cpp
+    main.cpp
+    read.cpp
+    write.cpp
 )
 
 target_link_libraries(${TARGET_NAME} PRIVATE Threads::Threads)
