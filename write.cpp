@@ -94,6 +94,10 @@ void handleBinaryWriteTest(std::ofstream& myfile) {
   if(myfile.is_open()) {
     // Write binary blob to file completely at once
     myfile.write(reinterpret_cast<char *>(&blobToWrite), sizeof(blobToWrite));
+    writeCount++;
+  }
+  else {
+    writeFailCount++;
   }
   state = not state;
 }

@@ -60,3 +60,7 @@ int main() {
   remove(BIN_FILE_NAME.c_str());
   std::cout << "Finished." << std::endl;
 }
+
+void test() {
+
+}

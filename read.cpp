@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <thread>
 
 static size_t readOpenFailCount = 0;
 static size_t readCount = 0;
@@ -22,6 +23,7 @@ static size_t invalidStateCnt = 0;
 void textFileReadTest(std::ifstream& myfile, FileModes fileMode);
 void binFileReadTest(std::ifstream& myfile, FileModes fileMode);
 bool checkFileState(std::ifstream& myfile);
+void attemptAnotherRead(std::ifstream& myfile, CriticalBlob& readBlob);
 
 
 void readerFunc(std::string fileName, FileTypes fileType, FileModes fileMode) {
@@ -66,30 +68,29 @@ void textFileReadTest(std::ifstream& myfile, FileModes fileMode) {
   using namespace std;
   string line;
   if(myfile.is_open()) {
-    bool readLineOneFlag = false;
-    bool readBothLinesFlag = false;
     size_t lineIdx = 0;
-    while(not myfile.eof()) {
-      if(getline(myfile, line)) {
-        if(line == "Writing this to a file.") {
-          readLineOne++;
-          readLineOneFlag = true;
+    if(checkFileState(myfile)) {
+      bool readLineOneFlag = false;
+      bool readBothLinesFlag = false;
+      while(not myfile.eof()) {
+        if(getline(myfile, line)) {
+          if(line == "Writing this to a file.") {
+            readLineOne++;
+            readLineOneFlag = true;
+          }
+          if(line == "Writing second line.") {
+            readBothLines++;
+            readBothLinesFlag = true;
+          }
+          lineIdx++;
         }
-        if(line == "Writing second line.") {
-          readBothLines++;
-          readBothLinesFlag = true;
+        if(fileMode == FileModes::APPEND and lineIdx >= 2) {
+          break;
         }
-        lineIdx++;
       }
-      else {
-        checkFileState(myfile);
+      if(readLineOneFlag or readBothLinesFlag) {
+        readCount++;
       }
-      if(fileMode == FileModes::APPEND and lineIdx >= 2) {
-         break;
-      }
-    }
-    if(readLineOneFlag or readBothLinesFlag) {
-      readCount++;
     }
   }
   else {
@@ -119,6 +120,11 @@ void binFileReadTest(std::ifstream& myfile, FileModes fileMode) {
         invalidStateCnt++;
       }
     }
+    else {
+      // In principle, it is possible to retry the read. In reality, it would make sense
+      // to do this after a small break (e.g. usleep(2) or something similar)
+      // attemptAnotherRead(myfile, readBlob);
+    }
   }
   else {
     readOpenFailCount++;
@@ -138,5 +144,23 @@ bool checkFileState(std::ifstream& myfile) {
       badFileFailCount++;
     }
     return false;
+  }
+}
+
+void attemptAnotherRead(std::ifstream& myfile, CriticalBlob& readBlob) {
+  // It is important to clear the error flags!
+  myfile.clear();
+  size_t retryMax = 3;
+  int retryIdx = 0;
+  while(retryIdx < retryMax) {
+    myfile.read(reinterpret_cast<char*>(&readBlob), sizeof(readBlob));
+    if(myfile.good()) {
+      // Read worked
+    }
+    else {
+      // Still does not work
+    }
+    myfile.clear();
+    retryIdx++;
   }
 }
